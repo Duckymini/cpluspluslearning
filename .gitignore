@@ -1,0 +1,14 @@
+# Ignore everything by default
+*
+
+# Allow directories for traversal
+!*/
+
+# Keep Git ignore file, C++ sources, and PDFs
+!.gitignore
+!*.cpp
+!*.pdf
+
+# Explicitly ignore build artifacts and IDE configuration
+build/
+.vscode/
