@@ -6,6 +6,7 @@
 
 # Keep Git ignore file, C++ sources, and PDFs
 !.gitignore
+!Module 1/
 !*.cpp
 !*.pdf
 
