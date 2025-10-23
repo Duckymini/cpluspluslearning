@@ -1,62 +1,50 @@
+#include <cfloat>
+#include <climits>
 #include <iomanip>
 #include <iostream>
-#include <limits>
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 namespace {
 
 constexpr int kNameWidth = 18;
 constexpr int kValueWidth = 28;
 
-template <typename T>
-typename std::enable_if<std::is_same<T, bool>::value, std::string>::type format_value(
-    T value) {
+std::string format_bool(bool value) {
     std::ostringstream oss;
     oss << std::boolalpha << value;
     return oss.str();
 }
 
 template <typename T>
-typename std::enable_if<std::is_floating_point<T>::value, std::string>::type format_value(
-    T value) {
-    std::ostringstream oss;
-    oss << std::scientific
-        << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
-    return oss.str();
-}
-
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 1 &&
-                            !std::is_same<T, bool>::value,
-                        std::string>::type
-format_value(T value) {
-    std::ostringstream oss;
-    oss << static_cast<int>(value);
-    return oss.str();
-}
-
-template <typename T>
-typename std::enable_if<
-    !std::is_same<T, bool>::value && !std::is_floating_point<T>::value &&
-        !(std::is_integral<T>::value && sizeof(T) == 1),
-    std::string>::type
-format_value(T value) {
+std::string format_integral(T value) {
     std::ostringstream oss;
     oss << value;
     return oss.str();
 }
 
 template <typename T>
-void print_limits(std::string_view name) {
-    using limits = std::numeric_limits<T>;
+std::string format_char_value(T value) {
+    std::ostringstream oss;
+    oss << static_cast<int>(value);
+    return oss.str();
+}
+
+std::string format_float(long double value, int precision) {
+    std::ostringstream oss;
+    oss << std::scientific << std::setprecision(precision) << value;
+    return oss.str();
+}
+
+void print_row(std::string_view name,
+               const std::string &lowest,
+               const std::string &highest,
+               bool is_signed) {
     std::cout << std::left << std::setw(kNameWidth) << name << ' '
-              << std::right << std::setw(kValueWidth)
-              << format_value(limits::lowest()) << ' '
-              << std::setw(kValueWidth) << format_value(limits::max()) << ' '
-              << "signed=" << (limits::is_signed ? "true" : "false") << '\n';
+              << std::right << std::setw(kValueWidth) << lowest << ' '
+              << std::setw(kValueWidth) << highest << ' '
+              << "signed=" << (is_signed ? "true" : "false") << '\n';
 }
 
 void print_header() {
@@ -75,19 +63,63 @@ void print_header() {
 
 int main() {
     print_header();
-    print_limits<bool>("bool");
-    print_limits<char>("char");
-    print_limits<signed char>("signed char");
-    print_limits<unsigned char>("unsigned char");
-    print_limits<short>("short");
-    print_limits<unsigned short>("unsigned short");
-    print_limits<int>("int");
-    print_limits<unsigned int>("unsigned int");
-    print_limits<long>("long");
-    print_limits<unsigned long>("unsigned long");
-    print_limits<long long>("long long");
-    print_limits<unsigned long long>("unsigned long long");
-    print_limits<float>("float");
-    print_limits<double>("double");
-    print_limits<long double>("long double");
+    print_row("bool", format_bool(false), format_bool(true), false);
+    print_row("char",
+              format_char_value(CHAR_MIN),
+              format_char_value(CHAR_MAX),
+              CHAR_MIN < 0);
+    print_row("signed char",
+              format_char_value(SCHAR_MIN),
+              format_char_value(SCHAR_MAX),
+              true);
+    print_row("unsigned char",
+              format_integral(0u),
+              format_integral(static_cast<unsigned int>(UCHAR_MAX)),
+              false);
+    print_row("short",
+              format_integral(SHRT_MIN),
+              format_integral(SHRT_MAX),
+              true);
+    print_row("unsigned short",
+              format_integral(0u),
+              format_integral(static_cast<unsigned int>(USHRT_MAX)),
+              false);
+    print_row("int",
+              format_integral(INT_MIN),
+              format_integral(INT_MAX),
+              true);
+    print_row("unsigned int",
+              format_integral(0u),
+              format_integral(UINT_MAX),
+              false);
+    print_row("long",
+              format_integral(LONG_MIN),
+              format_integral(LONG_MAX),
+              true);
+    print_row("unsigned long",
+              format_integral(0ul),
+              format_integral(ULONG_MAX),
+              false);
+    print_row("long long",
+              format_integral(LLONG_MIN),
+              format_integral(LLONG_MAX),
+              true);
+    print_row("unsigned long long",
+              format_integral(0ull),
+              format_integral(ULLONG_MAX),
+              false);
+    print_row("float",
+              format_float(-FLT_MAX, FLT_DIG),
+              format_float(FLT_MAX, FLT_DIG),
+              true);
+    print_row("double",
+              format_float(-DBL_MAX, DBL_DIG),
+              format_float(DBL_MAX, DBL_DIG),
+              true);
+#ifdef LDBL_MAX
+    print_row("long double",
+              format_float(-LDBL_MAX, LDBL_DIG),
+              format_float(LDBL_MAX, LDBL_DIG),
+              true);
+#endif
 }
