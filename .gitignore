@@ -11,6 +11,7 @@
 !Module 3/
 !*.cpp
 !*.pdf
+!*.md
 
 # Explicitly ignore build artifacts and IDE configuration
 build/
