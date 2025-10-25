@@ -66,5 +66,11 @@ int main()
     // int i;
     // cout << i << "\n";
 
+    for(int i = 0; i < 4; i++) cout << i << "\n";
+    cout << "\n";
+    for(int i = 0; i < 4; ++i) cout << i << "\n";
+
+    
+
     return 0;
 }
